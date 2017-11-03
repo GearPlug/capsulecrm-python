@@ -8,8 +8,7 @@ class Client(object):
     BASE_URL = 'https://api.capsulecrm.com/api/'
     _VALID_VERSIONS = ['v2', ]
 
-    def __init__(self, name, token, version=None):
-        self.name = name
+    def __init__(self, token, version=None):
         self.token = token
         if version not in self._VALID_VERSIONS:
             self.version = self._VALID_VERSIONS[0]
