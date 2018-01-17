@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='typeform',
+setup(name='capsulecrm',
       version='0.1',
       description='API wrapper for CapsuleCRM written in Python',
       url='https://github.com/GearPlug/capsulecrm-python',
