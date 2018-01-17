@@ -21,11 +21,11 @@ class Client(object):
 
     def _request(self, method, endpoint, data=None, headers={}):
         headers = {
-            'Accept': 'application/json',
             'Authorization': 'Bearer {0}'.format(self.token),
             'Content-Type': 'application/json'
         }
         url = '{0}{1}/{2}'.format(self.BASE_URL, self.version, endpoint)
+        print("url", url)
         result = requests.request(method, url, headers=headers, data=json.dumps(data))
         return result.text
 
