@@ -25,9 +25,8 @@ class Client(object):
             'Content-Type': 'application/json'
         }
         url = '{0}{1}/{2}'.format(self.BASE_URL, self.version, endpoint)
-        print("url", url)
         result = requests.request(method, url, headers=headers, data=json.dumps(data))
-        return result.text
+        return result.json()
 
     def create_tag(self, entity, name, description, datatag):
         """Returns the created tag.
