@@ -226,3 +226,6 @@ class Client(object):
             'embed': embed
         }
         return self._get('/opportunities', data=data)
+
+    def get_current_user(self):
+        return self._get('/users/current')
