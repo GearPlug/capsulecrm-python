@@ -266,9 +266,5 @@ class Client(object):
         Returns:
             A dict.
         """
-        data = {
-            'task': {}
-        }
-        data['opportunity'].update(embed)
-        return self._post('/tasks', data=data)
+        return self._post('/tasks', data={'task' : embed})
 
