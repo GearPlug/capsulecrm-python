@@ -13,19 +13,19 @@ class Client(object):
         if version not in self._VALID_VERSIONS:
             self.version = self._VALID_VERSIONS[0]
 
-    def _post(self, endpoint, data=None):
-        return self._request('post', endpoint, data=data)
+    def _post(self, endpoint, data=None, params=None):
+        return self._request('post', endpoint, data=data, params=params)
 
-    def _get(self, endpoint, data=None):
-        return self._request('get', endpoint, data=data)
+    def _get(self, endpoint, data=None, params=None):
+        return self._request('get', endpoint, data=data, params=params)
 
-    def _request(self, method, endpoint, data=None, headers={}):
+    def _request(self, method, endpoint, params=None, data=None):
         headers = {
             'Authorization': 'Bearer {0}'.format(self.token),
             'Content-Type': 'application/json'
         }
         url = '{0}{1}/{2}'.format(self.BASE_URL, self.version, endpoint)
-        result = requests.request(method, url, headers=headers, data=json.dumps(data))
+        result = requests.request(method, url, headers=headers, params=params, data=data)
         return result.json()
 
     def create_tag(self, entity, name, description, datatag):
@@ -47,7 +47,7 @@ class Client(object):
         }
         return self._post('{}/tags'.format(entity), data=data)
 
-    def list_tag(self, entity, page=1, perpage=50):
+    def list_tag(self, entity, page=None, perpage=None):
         """Returns all created tags.
         Args:
             entity: String [parties, opportunities, kases]
@@ -60,7 +60,7 @@ class Client(object):
             'page': page,
             'perPage': perpage
         }
-        return self._get('{}/tags'.format(entity), data=data)
+        return self._get('{}/tags'.format(entity), params=data)
 
     def create_person(self, embed):
         """Returns the created person.
@@ -138,7 +138,7 @@ class Client(object):
         data['party'].update(embed)
         return self._post('/parties', data=data)
 
-    def list_parties(self, since=None, page=1, perpage=50, embed={}):
+    def list_parties(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
         Args:
             since: Date
@@ -154,7 +154,7 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/parties', data=data)
+        return self._get('/parties', params=data)
 
     def create_milestone(self, name, description, probability, complete=False):
         """Returns the create milestone.
@@ -176,7 +176,7 @@ class Client(object):
         }
         return self._post('/milestones', data=data)
 
-    def list_milestone(self, page=1, perpage=50):
+    def list_milestone(self, page=None, perpage=None):
         """Returns the all milestones.
         Args:
             page: Integer
@@ -188,7 +188,7 @@ class Client(object):
             'page': page,
             'perPage': perpage
         }
-        return self._get('/milestones', data=data)
+        return self._get('/milestones', params=data)
 
     def create_oppotunity(self, embed):
         """Returns the created oppotunity.
@@ -208,7 +208,7 @@ class Client(object):
         data['opportunity'].update(embed)
         return self._post('/opportunities', data=data)
 
-    def list_opportunities(self, since=None, page=1, perpage=50, embed={}):
+    def list_opportunities(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
         Args:
             since: Date
@@ -224,7 +224,26 @@ class Client(object):
             'perPage': perpage,
             'embed': embed
         }
-        return self._get('/opportunities', data=data)
+        return self._get('/opportunities', params=data)
 
     def get_current_user(self):
         return self._get('/users/current')
+
+    def list_users(self):
+        return self._get('/users')
+
+    def list_tasks(self, page=None, perpage=None, embed=None):
+        """Returns the all tasks.
+        Args:
+            page: Integer
+            perpage: Integer
+            embed: dict
+        Returns:
+            A dict.
+        """
+        data = {
+            'page': page,
+            'perPage': perpage,
+            'embed': embed
+        }
+        return self._get('/tasks', params=data)
