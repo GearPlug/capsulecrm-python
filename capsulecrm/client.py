@@ -25,6 +25,8 @@ class Client(object):
             'Content-Type': 'application/json'
         }
         url = '{0}{1}/{2}'.format(self.BASE_URL, self.version, endpoint)
+        if data:
+            data = json.dumps(data)
         result = requests.request(method, url, headers=headers, params=params, data=data)
         return result.json()
 
