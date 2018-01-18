@@ -195,7 +195,8 @@ class Client(object):
     def create_oppotunity(self, embed):
         """Returns the created oppotunity.
         Args:
-            embed: Dict { 'party': dict { 'id': Long required },
+            embed: Dict { 'description' : String
+                          'party': dict { 'id': Long required },
                           'name': String required, 'description': String,
                           'milestone': dict { 'id': Long required },
                           'value': dict { 'amount': Double required, 'currency': String },
@@ -249,3 +250,25 @@ class Client(object):
             'embed': embed
         }
         return self._get('/tasks', params=data)
+
+    def create_task(self, embed):
+        """Returns the created task.
+        Args:
+            embed: Dict { 'party': dict { 'id': Long required },
+                          'detail': String required,
+                          'description': String,
+                          'dueOn': String,
+                          'dueTime': dict { 'amount': Double required, 'currency': String },
+                          'oportunity': dict { 'id': Long required },
+                          'owner': dict { 'id': Long required },
+                          'completeAt': String,
+                        }
+        Returns:
+            A dict.
+        """
+        data = {
+            'task': {}
+        }
+        data['opportunity'].update(embed)
+        return self._post('/tasks', data=data)
+
