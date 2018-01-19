@@ -235,7 +235,7 @@ class Client(object):
     def list_users(self):
         return self._get('/users')
 
-    def list_tasks(self, page=None, perpage=None, embed=None):
+    def list_tasks(self, page=None, perpage=None, embed=None, since=None):
         """Returns the all tasks.
         Args:
             page: Integer
@@ -245,6 +245,7 @@ class Client(object):
             A dict.
         """
         data = {
+            'since' : since,
             'page': page,
             'perPage': perpage,
             'embed': embed
