@@ -1,34 +1,59 @@
+from urllib.parse import urlencode
+
 import requests
-import requests.auth
-import pprint
-import json
+
+from capsulecrm import exceptions
 
 
 class Client(object):
-    BASE_URL = 'https://api.capsulecrm.com/api/'
+    AUTHORITY_URL = 'https://api.capsulecrm.com/'
+    AUTH_ENDPOINT = 'oauth/authorise'
+    TOKEN_ENDPOINT = 'oauth/token'
+
+    RESOURCE = 'https://api.capsulecrm.com/api/'
     _VALID_VERSIONS = ['v2', ]
 
-    def __init__(self, token, version=None):
-        self.token = token
-        if version not in self._VALID_VERSIONS:
-            self.version = self._VALID_VERSIONS[0]
+    def __init__(self, client_id, client_secret, api_version=None):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.access_token = None
+        if api_version not in self._VALID_VERSIONS:
+            self.api_version = self._VALID_VERSIONS[0]
+        self.base_url = self.RESOURCE + self.api_version + '/'
 
-    def _post(self, endpoint, data=None, params=None):
-        return self._request('post', endpoint, data=data, params=params)
-
-    def _get(self, endpoint, data=None, params=None):
-        return self._request('get', endpoint, data=data, params=params)
-
-    def _request(self, method, endpoint, params=None, data=None):
-        headers = {
-            'Authorization': 'Bearer {0}'.format(self.token),
-            'Content-Type': 'application/json'
+    def authorization_url(self, redirect_uri, scope, state=None):
+        params = {
+            'client_id': self.client_id,
+            'redirect_uri': redirect_uri,
+            'scope': ' '.join(scope),
+            'response_type': 'code',
         }
-        url = '{0}{1}/{2}'.format(self.BASE_URL, self.version, endpoint)
-        if data:
-            data = json.dumps(data)
-        result = requests.request(method, url, headers=headers, params=params, data=data)
-        return result.json()
+        if state:
+            params['state'] = None
+        return self.AUTHORITY_URL + self.AUTH_ENDPOINT + urlencode(params)
+
+    def exchange_code(self, redirect_uri, code):
+        data = {
+            'client_id': self.client_id,
+            'redirect_uri': redirect_uri,
+            'client_secret': self.client_secret,
+            'code': code,
+            'grant_type': 'authorization_code',
+        }
+        return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
+
+    def refresh_token(self, redirect_uri, refresh_token):
+        data = {
+            'client_id': self.client_id,
+            'redirect_uri': redirect_uri,
+            'client_secret': self.client_secret,
+            'refresh_token': refresh_token,
+            'grant_type': 'refresh_token',
+        }
+        return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
+
+    def set_access_token(self, access_token):
+        self.access_token = access_token
 
     def create_tag(self, entity, name, description, datatag):
         """Returns the created tag.
@@ -245,7 +270,7 @@ class Client(object):
             A dict.
         """
         data = {
-            'since' : since,
+            'since': since,
             'page': page,
             'perPage': perpage,
             'embed': embed
@@ -267,5 +292,49 @@ class Client(object):
         Returns:
             A dict.
         """
-        return self._post('/tasks', data={'task' : embed})
+        return self._post('/tasks', data={'task': embed})
 
+    def _get(self, url, **kwargs):
+        return self._request('GET', url, **kwargs)
+
+    def _post(self, url, **kwargs):
+        return self._request('POST', url, **kwargs)
+
+    def _put(self, url, **kwargs):
+        return self._request('PUT', url, **kwargs)
+
+    def _patch(self, url, **kwargs):
+        return self._request('PATCH', url, **kwargs)
+
+    def _delete(self, url, **kwargs):
+        return self._request('DELETE', url, **kwargs)
+
+    def _request(self, method, endpoint, headers=None, **kwargs):
+        _headers = {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + self.access_token
+        }
+        if headers:
+            _headers.update(headers)
+        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, **kwargs))
+
+    def _parse(self, response):
+        status_code = response.status_code
+        if 'application/json' in response.headers['Content-Type']:
+            r = response.json()
+        else:
+            r = response.text
+        if status_code in (200, 201, 202):
+            return r
+        elif status_code == 204:
+            return None
+        elif status_code == 400:
+            raise exceptions.BadRequestError(r)
+        elif status_code == 401:
+            raise exceptions.AuthenticationFailedError(r)
+        elif status_code == 403:
+            raise exceptions.ForbiddenError(r)
+        elif status_code == 422:
+            raise exceptions.ValidationFailedError(r)
+        else:
+            raise exceptions.UnknownError(r)
