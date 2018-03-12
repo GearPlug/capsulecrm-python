@@ -7,7 +7,7 @@ from capsulecrm import exceptions
 
 class Client(object):
     AUTHORITY_URL = 'https://api.capsulecrm.com/'
-    AUTH_ENDPOINT = 'oauth/authorise'
+    AUTH_ENDPOINT = 'oauth/authorise?'
     TOKEN_ENDPOINT = 'oauth/token'
 
     RESOURCE = 'https://api.capsulecrm.com/api/'
@@ -16,18 +16,19 @@ class Client(object):
     def __init__(self, client_id, client_secret, api_version=None):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.access_token = None
+        self.token = None
         if api_version not in self._VALID_VERSIONS:
             self.api_version = self._VALID_VERSIONS[0]
         self.base_url = self.RESOURCE + self.api_version + '/'
 
-    def authorization_url(self, redirect_uri, scope, state=None):
+    def authorization_url(self, redirect_uri, scope=None, state=None):
         params = {
             'client_id': self.client_id,
             'redirect_uri': redirect_uri,
-            'scope': ' '.join(scope),
             'response_type': 'code',
         }
+        if scope:
+            params['scope'] = ' '.join(scope),
         if state:
             params['state'] = None
         return self.AUTHORITY_URL + self.AUTH_ENDPOINT + urlencode(params)
@@ -52,8 +53,8 @@ class Client(object):
         }
         return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
 
-    def set_access_token(self, access_token):
-        self.access_token = access_token
+    def set_token(self, token):
+        self.token = token
 
     def create_tag(self, entity, name, description, datatag):
         """Returns the created tag.
@@ -312,7 +313,7 @@ class Client(object):
     def _request(self, method, endpoint, headers=None, **kwargs):
         _headers = {
             'Accept': 'application/json',
-            'Authorization': 'Bearer ' + self.access_token
+            'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
             _headers.update(headers)
