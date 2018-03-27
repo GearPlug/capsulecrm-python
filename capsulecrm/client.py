@@ -318,7 +318,7 @@ class Client(object):
         }
         if headers:
             _headers.update(headers)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=kwargs))
+        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
 
     def _parse(self, response):
         status_code = response.status_code
