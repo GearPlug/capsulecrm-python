@@ -300,7 +300,6 @@ class Client(object):
         return self._request('GET', url, **kwargs)
 
     def _post(self, url, **kwargs):
-        print("kwargs", kwargs)
         return self._request('POST', url, **kwargs)
 
     def _put(self, url, **kwargs):
