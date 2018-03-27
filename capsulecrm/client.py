@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 import requests
 
 from capsulecrm import exceptions
+import json
 
 
 class Client(object):
@@ -73,7 +74,7 @@ class Client(object):
                 "dataTag": datatag
             }
         }
-        return self._post('{}/tags'.format(entity), data=data)
+        return self._post('{}/tags'.format(entity), **data)
 
     def list_tag(self, entity, page=None, perpage=None):
         """Returns all created tags.
@@ -127,7 +128,7 @@ class Client(object):
             }
         }
         data['party'].update(embed)
-        return self._post('/parties', data=data)
+        return self._post('/parties', **data)
 
     def create_organisation(self, embed):
         """Returns the created organisation.
@@ -164,7 +165,7 @@ class Client(object):
             }
         }
         data['party'].update(embed)
-        return self._post('/parties', data=data)
+        return self._post('/parties', **data)
 
     def list_parties(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
@@ -202,7 +203,7 @@ class Client(object):
                 'complete': complete
             }
         }
-        return self._post('/milestones', data=data)
+        return self._post('/milestones', **data)
 
     def list_milestone(self, page=None, perpage=None):
         """Returns the all milestones.
@@ -235,7 +236,7 @@ class Client(object):
             'opportunity': {}
         }
         data['opportunity'].update(embed)
-        return self._post('/opportunities', data=data)
+        return self._post('/opportunities', **data)
 
     def list_opportunities(self, since=None, page=None, perpage=None, embed=None):
         """Returns the all parties.
@@ -293,12 +294,13 @@ class Client(object):
         Returns:
             A dict.
         """
-        return self._post('/tasks', data={'task': embed})
+        return self._post('/tasks', **{'task': embed})
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
 
     def _post(self, url, **kwargs):
+        print("kwargs", kwargs)
         return self._request('POST', url, **kwargs)
 
     def _put(self, url, **kwargs):
@@ -311,13 +313,16 @@ class Client(object):
         return self._request('DELETE', url, **kwargs)
 
     def _request(self, method, endpoint, headers=None, **kwargs):
+        print("kkk", kwargs)
         _headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
             _headers.update(headers)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, **kwargs))
+        m = json.dumps(kwargs)
+        print("m", m)
+        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=m))
 
     def _parse(self, response):
         status_code = response.status_code
