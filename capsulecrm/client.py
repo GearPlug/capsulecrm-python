@@ -313,16 +313,13 @@ class Client(object):
         return self._request('DELETE', url, **kwargs)
 
     def _request(self, method, endpoint, headers=None, **kwargs):
-        print("kkk", kwargs)
         _headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
             _headers.update(headers)
-        m = json.dumps(kwargs)
-        print("m", m)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=m))
+        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=kwargs))
 
     def _parse(self, response):
         status_code = response.status_code
