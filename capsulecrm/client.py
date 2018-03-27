@@ -312,7 +312,7 @@ class Client(object):
 
     def _request(self, method, endpoint, headers=None, **kwargs):
         _headers = {
-            'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
