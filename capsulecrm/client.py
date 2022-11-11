@@ -34,20 +34,18 @@ class Client(object):
             params['state'] = None
         return self.AUTHORITY_URL + self.AUTH_ENDPOINT + urlencode(params)
 
-    def exchange_code(self, redirect_uri, code):
+    def exchange_code(self, code):
         data = {
             'client_id': self.client_id,
-            'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'code': code,
             'grant_type': 'authorization_code',
         }
         return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
 
-    def refresh_token(self, redirect_uri, refresh_token):
+    def refresh_token(self, refresh_token):
         data = {
             'client_id': self.client_id,
-            'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token',
