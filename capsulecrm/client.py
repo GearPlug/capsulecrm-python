@@ -293,6 +293,36 @@ class Client(object):
             A dict.
         """
         return self._post('/tasks', **{'task': embed})
+    
+    def filter_order_data(self, entity, conditions=None, order_by=None, page=None, per_page=None, embed=None):
+        """
+        Perform structured searches on parties, projects and opportunities
+        Args:
+            entity: (str) parties, projects, opportunities
+            conditions: array of (dict)
+                field: entity field reference
+                operator: some options are "is", "contains", "is greater than"
+                value: variable used to filter depending on operator.
+            order_by: array of (dict)
+                field: entity field reference
+                direction: "ascending" or "descending"
+            page: (int)
+            perpage: (int)
+            embed: (str) separated by commas, supported values depending on entity
+        """
+        params = {
+            'page': page,
+            'perPage': per_page,
+            'embed': embed
+        }
+        data = {
+            "filter": {}
+        }
+        if conditions:
+            data["filter"].update(conditions=conditions)
+        if order_by:
+            data["filter"].update(orderBy=order_by)
+        return self._post(f'{entity}/filters/results', params=params, **data)
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
@@ -309,14 +339,18 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request('DELETE', url, **kwargs)
 
-    def _request(self, method, endpoint, headers=None, **kwargs):
+    def _request(self, method, endpoint, headers=None, params=None, **kwargs):
         _headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
             _headers.update(headers)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
+        return self._parse(requests.request(method, 
+                                            self.base_url + endpoint, 
+                                            headers=_headers, 
+                                            data=json.dumps(kwargs),
+                                            params=params))
 
     def _parse(self, response):
         status_code = response.status_code
