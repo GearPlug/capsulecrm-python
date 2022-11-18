@@ -92,8 +92,11 @@ class Client(object):
     def create_person(self, embed):
         """Returns the created person.
         Args:
-            embed: Dict { 'firstName': String required, 'lastName': String required, 'title': String,
-                          'jobTitle': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof), 'organisation': String,
+            embed: Dict { 'firstName': String required, 
+                          'lastName': String required, 
+                          'title': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof),
+                          'jobTitle': String, 
+                          'organisation': String,
                           'about': String,
                           'addresses': dict { 'type': String (Home, Postal, Office),
                                               'street': String,
@@ -107,7 +110,6 @@ class Client(object):
                                                                          YOUTUBE, INSTAGRAM, PINTEREST),
                                              'address': String required,
                                              'type': String (Home, Work),
-                                             'url': String required },
                           'emailAddresses': dict { 'type': String (Home, Work),
                                                    'address': String required },
                           'tags': dict { 'id': Long,
@@ -323,6 +325,9 @@ class Client(object):
         if order_by:
             data["filter"].update(orderBy=order_by)
         return self._post(f'{entity}/filters/results', params=params, **data)
+    
+    def list_countries(self):
+        return self._get('/countries')
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)

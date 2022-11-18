@@ -12,7 +12,7 @@ pip install git+git://github.com/GearPlug/capsulecrm-python.git
 ## Usage
 ```
 from capsulecrm.client import Client
-client = Client('TOKEN')
+client = Client(client_id, client_secret)
 ```
 
 Create Tag
