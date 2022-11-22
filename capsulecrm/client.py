@@ -281,20 +281,41 @@ class Client(object):
 
     def create_task(self, embed):
         """Returns the created task.
+        One of Party, Opportunity or Kase must be included
         Args:
-            embed: Dict { 'party': dict { 'id': Long required },
+            embed: Dict { 
                           'detail': String required,
+                          'category': category ID.
                           'description': String,
                           'dueOn': String,
                           'dueTime': dict { 'amount': Double required, 'currency': String },
                           'oportunity': dict { 'id': Long required },
+                          'party': dict { 'id': Long required },
+                          'kase': dict { 'id': Long required },
                           'owner': dict { 'id': Long required },
-                          'completeAt': String,
+                          'completedAt': String,
                         }
         Returns:
             A dict.
         """
         return self._post('/tasks', **{'task': embed})
+    
+    def list_projects(self, page=None, perpage=None, embed=None, since=None):
+        """Returns the all tasks.
+        Args:
+            page: Integer
+            perpage: Integer
+            embed: dict
+        Returns:
+            A dict.
+        """
+        data = {
+            'since': since,
+            'page': page,
+            'perPage': perpage,
+            'embed': embed
+        }
+        return self._get('/kases', params=data)
     
     def filter_order_data(self, entity, conditions=None, order_by=None, page=None, per_page=None, embed=None):
         """
@@ -328,6 +349,12 @@ class Client(object):
     
     def list_countries(self):
         return self._get('/countries')
+
+    def list_currencies(self):
+        return self._get('/currencies')
+
+    def list_categories(self):
+        return self._get('/categories')
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
