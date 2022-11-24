@@ -31,23 +31,21 @@ class Client(object):
         if scope:
             params['scope'] = ' '.join(scope),
         if state:
-            params['state'] = None
+            params['state'] = state
         return self.AUTHORITY_URL + self.AUTH_ENDPOINT + urlencode(params)
 
-    def exchange_code(self, redirect_uri, code):
+    def exchange_code(self, code):
         data = {
             'client_id': self.client_id,
-            'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'code': code,
             'grant_type': 'authorization_code',
         }
         return self._parse(requests.post(self.AUTHORITY_URL + self.TOKEN_ENDPOINT, data=data))
 
-    def refresh_token(self, redirect_uri, refresh_token):
+    def refresh_token(self, refresh_token):
         data = {
             'client_id': self.client_id,
-            'redirect_uri': redirect_uri,
             'client_secret': self.client_secret,
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token',
@@ -94,8 +92,11 @@ class Client(object):
     def create_person(self, embed):
         """Returns the created person.
         Args:
-            embed: Dict { 'firstName': String required, 'lastName': String required, 'title': String,
-                          'jobTitle': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof), 'organisation': String,
+            embed: Dict { 'firstName': String required, 
+                          'lastName': String required, 
+                          'title': String (Mr, Master, Mrs, Miss, Ms, Dr, Prof),
+                          'jobTitle': String, 
+                          'organisation': String,
                           'about': String,
                           'addresses': dict { 'type': String (Home, Postal, Office),
                                               'street': String,
@@ -109,7 +110,6 @@ class Client(object):
                                                                          YOUTUBE, INSTAGRAM, PINTEREST),
                                              'address': String required,
                                              'type': String (Home, Work),
-                                             'url': String required },
                           'emailAddresses': dict { 'type': String (Home, Work),
                                                    'address': String required },
                           'tags': dict { 'id': Long,
@@ -281,20 +281,80 @@ class Client(object):
 
     def create_task(self, embed):
         """Returns the created task.
+        One of Party, Opportunity or Kase must be included
         Args:
-            embed: Dict { 'party': dict { 'id': Long required },
+            embed: Dict { 
                           'detail': String required,
+                          'category': category ID.
                           'description': String,
                           'dueOn': String,
                           'dueTime': dict { 'amount': Double required, 'currency': String },
                           'oportunity': dict { 'id': Long required },
+                          'party': dict { 'id': Long required },
+                          'kase': dict { 'id': Long required },
                           'owner': dict { 'id': Long required },
-                          'completeAt': String,
+                          'completedAt': String,
                         }
         Returns:
             A dict.
         """
         return self._post('/tasks', **{'task': embed})
+    
+    def list_projects(self, page=None, perpage=None, embed=None, since=None):
+        """Returns the all tasks.
+        Args:
+            page: Integer
+            perpage: Integer
+            embed: dict
+        Returns:
+            A dict.
+        """
+        data = {
+            'since': since,
+            'page': page,
+            'perPage': perpage,
+            'embed': embed
+        }
+        return self._get('/kases', params=data)
+    
+    def filter_order_data(self, entity, conditions=None, order_by=None, page=None, per_page=None, embed=None):
+        """
+        Perform structured searches on parties, projects and opportunities
+        Args:
+            entity: (str) parties, projects, opportunities
+            conditions: array of (dict)
+                field: entity field reference
+                operator: some options are "is", "contains", "is greater than"
+                value: variable used to filter depending on operator.
+            order_by: array of (dict)
+                field: entity field reference
+                direction: "ascending" or "descending"
+            page: (int)
+            perpage: (int)
+            embed: (str) separated by commas, supported values depending on entity
+        """
+        params = {
+            'page': page,
+            'perPage': per_page,
+            'embed': embed
+        }
+        data = {
+            "filter": {}
+        }
+        if conditions:
+            data["filter"].update(conditions=conditions)
+        if order_by:
+            data["filter"].update(orderBy=order_by)
+        return self._post(f'{entity}/filters/results', params=params, **data)
+    
+    def list_countries(self):
+        return self._get('/countries')
+
+    def list_currencies(self):
+        return self._get('/currencies')
+
+    def list_categories(self):
+        return self._get('/categories')
 
     def _get(self, url, **kwargs):
         return self._request('GET', url, **kwargs)
@@ -311,14 +371,18 @@ class Client(object):
     def _delete(self, url, **kwargs):
         return self._request('DELETE', url, **kwargs)
 
-    def _request(self, method, endpoint, headers=None, **kwargs):
+    def _request(self, method, endpoint, headers=None, params=None, **kwargs):
         _headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.token['access_token']
         }
         if headers:
             _headers.update(headers)
-        return self._parse(requests.request(method, self.base_url + endpoint, headers=_headers, data=json.dumps(kwargs)))
+        return self._parse(requests.request(method, 
+                                            self.base_url + endpoint, 
+                                            headers=_headers, 
+                                            data=json.dumps(kwargs),
+                                            params=params))
 
     def _parse(self, response):
         status_code = response.status_code

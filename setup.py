@@ -7,13 +7,13 @@ def read(fname):
 
 
 setup(name='capsulecrm-python',
-      version='0.1.3',
+      version='0.1.5',
       description='API wrapper for CapsuleCRM written in Python',
       long_description=read('README.md'),
       url='https://github.com/GearPlug/capsulecrm-python',
       author='Luisa Torres',
       author_email='hanna860@gmail.com',
-      license='GPL',
+      license='MIT',
       packages=['capsulecrm'],
       install_requires=[
           'requests',
