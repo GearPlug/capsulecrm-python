@@ -3,7 +3,7 @@ Capsule CRM API wrapper written in python.
 
 ## Installing
 ```
-pip install git+git://github.com/GearPlug/capsulecrm-python.git
+pip install capsulecrm-python
 ```
 
 ## Requirements
@@ -15,66 +15,71 @@ from capsulecrm.client import Client
 client = Client(client_id, client_secret)
 ```
 
-Create Tag
+### Advanced filtering for parties, organisations and projects
 ```
-client.create_tag('ENTITY, NAME, DESCRIPTION, DATATAG')
-```
-
-List Tags
-```
-client.list_tag('ENTITY, PAGE, PERPAGE')
+# Example:
+order_by= [{"field": "addedOn", "direction":"descending"}]
+conditions= [{"field":"email", "operator": "is", "value": "juan@mail.com"}]
+parties = client.filter_order_data('parties',conditions=conditions, order_by=order_by, page=1, per_page=1)
 ```
 
-Create Person
+### Create Person or Organisation
 ```
-client.create_person('EMBED')
-```
-
-Create Organisation
-```
-client.create_organisation('EMBED')
+client.create_person('embed')
+client.create_organisation('embed')
 ```
 
-List Parties
+### List Parties
 ```
-client.list_parties('SINCE, PAGE, PERPAGE, EMBED')
-```
-
-Create Milestone
-```
-client.create_milestone('NAME, DESCRIPTION, PROBABILITY, COMPLETE')
+client.list_parties('since, page, perpage, embed')
 ```
 
-List Milestone
+### Create and list Milestone
 ```
-client.list_milestone('NAME, DESCRIPTION, PROBABILITY, COMPLETE')
-```
-
-Create Opportunity
-```
-client.create_oppotunity('EMBED')
+client.create_milestone('name, description, probability, complete')
+client.list_milestone('page, perpage')
 ```
 
-List Opportunities
+### Create and List Opportunities
 ```
-client.list_opportunities('EMBED')
+client.create_oppotunity('embed')
+client.list_opportunities('since, page, perpage, embed')
 ```
+
+### Create and list tasks
+```
+client.create_task('embed')
+client.list_tasks('since, page, perpage, embed')
+```
+
+### Create and list tags
+```
+client.create_tag('entity, name, description, datatag')
+client.list_tag('entity, page, perpage')
+```
+
+### List projects, users, countries, currencies and categories
+```
+client.list_projects('since, page, perpage, embed')
+client.list_users()
+client.list_countries()
+client.list_currencies()
+client.list_categories()
+```
+
 
 ## TODO
 - show_party
 - show_multiple_parties
 - update_party
 - delete_party
-- list_employees
 - list_deleted_parties
-- search_parties
 - list_opportunities_by_party
 - show_opportunity
 - show_multiple_opportunities
 - update_opportunity
 - delete_opportunity
 - list_deleted_opportunities
-- search_opportunities
 - list_additional_parties
 - add_additional_party
 - remove_additional_party
