@@ -67,7 +67,10 @@ client.list_currencies()
 client.list_categories()
 ```
 
-
+### Get custom Fields by entity (parties, organisations or projects):
+```
+client.get_custom_fields('entity, page, perpage')
+```
 ## TODO
 - show_party
 - show_multiple_parties

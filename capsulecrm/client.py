@@ -347,6 +347,17 @@ class Client(object):
             data["filter"].update(orderBy=order_by)
         return self._post(f'{entity}/filters/results', params=params, **data)
     
+    def get_custom_fields(self, entity, page=None, per_page=None):
+        """
+        Returns custom fields for specific entity
+        Entity options: parties, opportunities or kases
+        """
+        params = {
+            'page': page,
+            'perPage': per_page
+        }
+        return self._get(f'{entity}/fields/definitions', params=params)
+    
     def list_countries(self):
         return self._get('/countries')
 
