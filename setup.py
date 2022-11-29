@@ -6,16 +6,18 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-setup(name='capsulecrm-python',
-      version='0.1.5',
-      description='API wrapper for CapsuleCRM written in Python',
-      long_description=read('README.md'),
-      url='https://github.com/GearPlug/capsulecrm-python',
-      author='Luisa Torres',
-      author_email='hanna860@gmail.com',
-      license='MIT',
-      packages=['capsulecrm'],
-      install_requires=[
-          'requests',
-      ],
-      zip_safe=False)
+setup(
+    name="capsulecrm-python",
+    version="0.1.6",
+    description="API wrapper for CapsuleCRM written in Python",
+    long_description=read("README.md"),
+    url="https://github.com/GearPlug/capsulecrm-python",
+    author="Luisa Torres",
+    author_email="hanna860@gmail.com",
+    license="MIT",
+    packages=["capsulecrm"],
+    install_requires=[
+        "requests",
+    ],
+    zip_safe=False,
+)
